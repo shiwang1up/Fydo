@@ -142,11 +142,11 @@ const HomeScreen = ({ navigation }) => {
     return (
         <SafeAreaView className="flex-1 bg-gray-200" style={{ paddingTop: insets.top }}>
             <Header rightIconOnPress={handleLogout} />
-            <View className='px-4'>
+            <View className='px-2'>
                 <HomeUI location={location} />
             </View>
 
-            <View className="flex-1 px-4">
+            <View className="flex-1 px-2">
                 {isLoading ? (
                     <View className='p-6 items-center flex-col justify-center bg-white mt-4 rounded-md'>
                         <LottieView
@@ -174,6 +174,7 @@ const HomeScreen = ({ navigation }) => {
                                 {error && <Text style={globalStyles.error}>{error}</Text>}
                             </View>
                             <TouchableOpacity
+                            className='px-4 my-4'
                                 style={globalStyles.submitButton}
                                 onPress={handleRandomRender}
                             >
@@ -354,7 +355,7 @@ const NothingFoundUI = ({ displayName }) => (
             loop
             style={globalStyles.empty}
         />
-        <Text className="text-3xl mt-8 font-bold text-gray-800 mb-2">We are not operational in your area</Text>
+        <Text className="text-xl mt-8 font-bold text-gray-800 mb-2">We are not operational in your area</Text>
         <Text ><Text className='font-bold'>{" "}{displayName}{" "}</Text>shop not found near you</Text>
         <Text className="text-gray-600 text-center px-10">
             Try widening your search radius

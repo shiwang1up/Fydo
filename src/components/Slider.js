@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { globalStyles } from '../constants/globalStyle';
+import { globalStyles, width } from '../constants/globalStyle';
 
 const CustomSlider = ({
     initialValue = null,
-    units = ['m', 'km'],
+    units = [' m ', 'km'],
     onValueChange,
 }) => {
     const [value, setValue] = useState(initialValue ? initialValue : 0);
@@ -32,24 +32,25 @@ const CustomSlider = ({
     };
 
     return (
-        <View className="my-6 relative ">
+        <View className="my-2 relative">
             <TextInput
-                className=" border border-gray-300 rounded-lg  mb-3"
+                className=" border border-gray-300 rounded-lg"
                 keyboardType="numeric"
                 value={value}
-                style={{ paddingLeft: 40 }}
+                style={{ paddingLeft: width * 0.08 }}
                 onChangeText={handleValueChange}
                 placeholder='Enter search radius'
+                placeholderTextColor={'#d1d5db'}
             />
-            <View style={{ position: 'absolute', top: 11, left: 10 }}>
-                <MaterialIcons name='search' size={20} color={globalStyles.borderColor} />
+            <View className="absolute top-1/2 -translate-y-1/2 left-2  ">
+                <MaterialIcons name='search' size={width * 0.05} color={'#d1d5db'} />
             </View>
-            <View style={globalStyles.unitContainer}>
+            <View className="absolute top-1/2 -translate-y-1/2 right-2 flex-row ">
                 {units.map((unit) => (
                     <TouchableOpacity
                         key={unit}
+                        className='px-2 py-2 border rounded-full ml-2'
                         style={[
-                            globalStyles.unitButton,
                             selectedUnit === unit
                                 ? globalStyles.unitButtonSelected
                                 : globalStyles.unitButtonUnselected,

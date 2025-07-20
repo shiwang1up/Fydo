@@ -1,6 +1,6 @@
 import { View, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { globalStyles } from '../constants/globalStyle';
+import { globalStyles, width } from '../constants/globalStyle';
 
 const Header = ({
     rightIcon = null,
@@ -8,7 +8,7 @@ const Header = ({
     bgColor = 'bg-white',
     showBorder = true,
     iconColor = '#374151',
-    iconSize = 24,
+    iconSize = width * 0.06,
     rightIconOnPress = () => { },
 }) => {
     return (

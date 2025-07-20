@@ -15,8 +15,6 @@ export const globalStyles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'row',
         borderRadius: width * 0.01,
-        marginTop: width * 0.015,
-        width: width * 0.2,
         alignSelf: 'center'
     },
     submitButtonText: {
@@ -65,12 +63,6 @@ export const globalStyles = StyleSheet.create({
         right: width * 0.02,
         top: width * 0.008
     },
-    unitButton: {
-        paddingHorizontal: width * 0.015,
-        paddingVertical: width * 0.01,
-        borderRadius: width * 0.3,
-        borderWidth: 1,
-    },
     unitButtonSelected: {
         backgroundColor: '#3B82F6',
         borderColor: '#2563EB',
@@ -91,8 +83,8 @@ export const globalStyles = StyleSheet.create({
         zIndex: 22
     },
     image: {
-        width: width * 0.06,
-        height: width * 0.06,
+        width: width * 0.07,
+        height: width * 0.07,
         borderRadius: 10000
     },
     borderColor: {
