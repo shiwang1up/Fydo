@@ -9,14 +9,13 @@ const CustomSlider = ({
     onValueChange,
 }) => {
     const [value, setValue] = useState(initialValue ? initialValue : 0);
-    const [selectedUnit, setSelectedUnit] = useState(units[1]); // default 'meter'
+    const [selectedUnit, setSelectedUnit] = useState(units[1]);
 
     const handleValueChange = (newValue) => {
         setValue(newValue);
         if (onValueChange) {
             let numericValue = parseFloat(newValue) || 0;
 
-            // Convert km to meters
             if (selectedUnit === 'km') {
                 numericValue = numericValue * 1000;
             }
@@ -35,7 +34,7 @@ const CustomSlider = ({
     return (
         <View className="my-6 relative ">
             <TextInput
-                className="h-10 border border-gray-300 rounded-lg  mb-3"
+                className=" border border-gray-300 rounded-lg  mb-3"
                 keyboardType="numeric"
                 value={value}
                 style={{ paddingLeft: 40 }}

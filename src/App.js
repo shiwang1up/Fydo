@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
 import "../global.css";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,8 +9,8 @@ import Immersive from 'react-native-immersive';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LoadingProvider } from './context/LoadingContext';
 import SplashScreen from "./screens/SplashScreen";
-
-
+import { InternetProvider } from './context/InternetContext';
+import Toast from "react-native-toast-message";
 
 function App() {
   Immersive.setImmersive(true);
@@ -69,14 +63,18 @@ function App() {
 
   return (
     <NavigationContainer>
-      <LoadingProvider>
-        <Stack.Navigator
-          initialRouteName={isLoggedIn ? 'Home' : 'Login'}
-          screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Home" component={Home} />
-        </Stack.Navigator>
-      </LoadingProvider>
+      <InternetProvider>
+        <LoadingProvider>
+          <Stack.Navigator
+            initialRouteName={isLoggedIn ? 'Home' : 'Login'}
+            screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Home" component={Home} />
+          </Stack.Navigator>
+          <Toast />
+
+        </LoadingProvider>
+      </InternetProvider>
     </NavigationContainer>
   );
 }

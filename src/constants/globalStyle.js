@@ -102,6 +102,11 @@ export const globalStyles = StyleSheet.create({
         color: '#FF0000',
         position: 'absolute',
         bottom: -5,
-        left:10
+        left: 10
+    },
+    empty: {
+        width: width * 0.4,
+        height: width * 0.4,
+        zIndex: 22
     }
 });

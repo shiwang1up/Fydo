@@ -1,63 +1,44 @@
-// permissions.js
 import { PermissionsAndroid, Platform } from 'react-native';
 
 export const requestPermissions = async () => {
     if (Platform.OS === 'android') {
         try {
-
             const apiLevel = Platform.constants.Version;
-            const locationPermission =
-                apiLevel >= 31
-                    ? PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-                    : PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
+            const locationPermission = PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
+            const notificationPermission = PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS;
 
-            const granted = await PermissionsAndroid.requestMultiple([
-                locationPermission,
-                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-            ]);
+            const requestAll = async () => {
+                const granted = await PermissionsAndroid.requestMultiple([
+                    locationPermission,
+                    notificationPermission,
+                ]);
 
-            if (
-                granted[locationPermission] === PermissionsAndroid.RESULTS.GRANTED &&
-                (apiLevel < 33 || // POST_NOTIFICATIONS introduced in Android 13 (API 33)
-                    granted[PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS] ===
-                    PermissionsAndroid.RESULTS.GRANTED)
-            ) {
-                console.log('All permissions granted');
-                return true;
-            } else {
-                console.log('Some permissions denied');
-                return false;
+                const locationGranted = granted[locationPermission] === PermissionsAndroid.RESULTS.GRANTED;
+                const notificationsGranted =
+                    apiLevel < 33 ||
+                    granted[notificationPermission] === PermissionsAndroid.RESULTS.GRANTED;
+
+                if (locationGranted && notificationsGranted) {
+                    console.log('All permissions granted');
+                    return true;
+                } else {
+                    console.log('Some permissions denied, asking again...');
+                    return false;
+                }
+            };
+
+            let grantedAll = await requestAll();
+
+            while (!grantedAll) {
+                grantedAll = await requestAll();
+                if (!grantedAll) {
+                    break;
+                }
             }
+
+            return grantedAll;
         } catch (err) {
             console.warn('Error requesting permissions:', err);
-            return false;
-        }
-    }
-    return true;
-};
-
-export const checkPermissions = async () => {
-    if (Platform.OS === 'android') {
-        try {
-            const apiLevel = Platform.constants.Version;
-            const locationPermission =
-                apiLevel >= 31
-                    ? PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-                    : PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
-
-            const locationGranted = await PermissionsAndroid.check(locationPermission);
-            let notificationsGranted = true;
-
-            // POST_NOTIFICATIONS only exists in Android 13+
-            if (apiLevel >= 33) {
-                notificationsGranted = await PermissionsAndroid.check(
-                    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-                );
-            }
-
-            return locationGranted && notificationsGranted;
-        } catch (err) {
-            console.warn('Error checking permissions:', err);
             return false;
         }
     }

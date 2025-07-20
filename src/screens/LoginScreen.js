@@ -26,11 +26,6 @@ const LoginScreen = ({ navigation }) => {
             return;
         }
 
-        if (password.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters');
-            return;
-        }
-
         setIsLoading(true);
         await AsyncStorage.setItem('isLoggedIn', 'true');
         // Simulate login process
@@ -44,23 +39,20 @@ const LoginScreen = ({ navigation }) => {
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             className="flex-1 bg-white"
-        // style={{ paddingTop: insets.top }}
         >
             <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 keyboardShouldPersistTaps="handled"
             >
                 <View className="flex-1 px-6 pb-10 justify-center">
-                    {/* Logo */}
-                    <View className="items-center mb-10 bg-black ">
+                    <View className="items-center mb-10 ">
                         <Image
-                            source={require('../assets/logo/fydoin_logo.jpeg')} // Replace with your logo
+                            source={require('../assets/logo/fydoin_logo.jpeg')}
                             className="w-36 h-36 rounded-full"
                             resizeMode="contain"
                         />
                     </View>
 
-                    {/* Title */}
                     <Text className="text-3xl font-bold text-gray-800 mb-2 text-center  ">
                         Welcome Back
                     </Text>
@@ -68,7 +60,6 @@ const LoginScreen = ({ navigation }) => {
                         Sign in to continue to your account
                     </Text>
 
-                    {/* Email Input */}
                     <View className="mb-4">
                         <Text className="text-gray-700 mb-2">Email</Text>
                         <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3">
@@ -84,7 +75,6 @@ const LoginScreen = ({ navigation }) => {
                         </View>
                     </View>
 
-                    {/* Password Input */}
                     <View className="mb-6">
                         <Text className="text-gray-700 mb-2">Password</Text>
                         <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3">
@@ -106,12 +96,10 @@ const LoginScreen = ({ navigation }) => {
                         </View>
                     </View>
 
-                    {/* Forgot Password */}
                     <TouchableOpacity className="items-end mb-6">
                         <Text className="text-blue-500 font-medium">Forgot Password?</Text>
                     </TouchableOpacity>
 
-                    {/* Login Button */}
                     <TouchableOpacity
                         className={`bg-blue-600 py-3 rounded-lg items-center justify-center ${isLoading ? 'opacity-70' : ''}`}
                         onPress={handleLogin}
@@ -124,36 +112,33 @@ const LoginScreen = ({ navigation }) => {
                         )}
                     </TouchableOpacity>
 
-                    {/* Divider */}
                     <View className="flex-row items-center my-6">
                         <View className="flex-1 h-px bg-gray-300" />
                         <Text className="px-3 text-gray-500">OR</Text>
                         <View className="flex-1 h-px bg-gray-300" />
                     </View>
 
-                    {/* Social Login */}
                     <View className="flex-row justify-center gap-2">
                         <TouchableOpacity className="border border-gray-300 p-3 rounded-full">
                             <Image
-                                source={require('../assets/logo/icons8-google-100.png')} // Replace with your Google icon
+                                source={require('../assets/logo/icons8-google-100.png')}
                                 className="w-6 h-6"
                             />
                         </TouchableOpacity>
                         <TouchableOpacity className="border border-gray-300 p-3 rounded-full">
                             <Image
-                                source={require('../assets/logo/icons8-meta-500.png')} // Replace with your Facebook icon
+                                source={require('../assets/logo/icons8-meta-500.png')}
                                 className="w-6 h-6"
                             />
                         </TouchableOpacity>
                         <TouchableOpacity className="border border-gray-300 p-3 rounded-full">
                             <Image
-                                source={require('../assets/logo/icons8-apple-104.png')} // Replace with your Apple icon
+                                source={require('../assets/logo/icons8-apple-104.png')}
                                 className="w-6 h-6"
                             />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Sign Up Link */}
                     <View className="flex-row justify-center mt-6">
                         <Text className="text-gray-500">Don't have an account? </Text>
                         <TouchableOpacity>

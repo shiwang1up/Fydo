@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, SafeAreaView, Alert, ActivityIndicator, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '../components/Header';
-import checkNearbyPlacesOSM from '../services/Location';
+import { checkNearbyPlacesOSM, getPlaceName } from '../services/Location';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { LoadingContext } from '../context/LoadingContext';
 import CustomSlider from '../components/Slider';
@@ -11,13 +11,18 @@ import LottieView from 'lottie-react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@react-navigation/native';
+import { InternetContext } from '../context/InternetContext';
+import Toast from "react-native-toast-message";
+
 
 const HomeScreen = ({ navigation }) => {
+    const { isConnected } = useContext(InternetContext);
     const insets = useSafeAreaInsets();
     const [searchResult, setSearchResult] = useState(null);
     const { isLoading, setIsLoading } = useContext(LoadingContext);
     const [error, setError] = useState('');
     const [distance, setDistance] = useState(null);
+    const [location, setLocation] = useState('')
     const placeTypes = [
         { label: "Alcohol", value: 'alcohol' },
         { label: "Hardware", value: 'hardware' },
@@ -29,29 +34,66 @@ const HomeScreen = ({ navigation }) => {
         { label: "Cosmetics", value: 'cosmetics' },
     ];
     const [selectedPlaceType, setSelectedPlaceType] = useState(placeTypes[0].value);
-    const [displayName, setDisplayName] = useState('');
     const [filteredPlaces, setFilteredPlaces] = useState([]);
     const [placeCounts, setPlaceCounts] = useState({});
     const [limitedPlaces, setLimitedPlaces] = useState([]);
+    const MemoizedShopsUI = React.memo(ShopsUI);
+    const MemoizedNothingFoundUI = React.memo(NothingFoundUI);
 
 
     useEffect(() => {
         if (limitedPlaces.length > 0) {
             filterPlaces(limitedPlaces, selectedPlaceType);
         }
+
+        if (isConnected) {
+            const fetchPlace = async () => {
+                try {
+                    const val = await getPlaceName();
+                    setLocation(val);
+                    console.log(val, "val");
+                } catch (error) {
+                    console.error('Error fetching place name:', error);
+                }
+            };
+
+            fetchPlace();
+        }
     }, [selectedPlaceType]);
 
+    const renderPlaceTypeButton = useCallback((place) => (
+        <TouchableOpacity
+            key={place.value}
+            style={[
+                globalStyles.placeButton,
+                selectedPlaceType === place.value
+                    ? globalStyles.selectedButton
+                    : globalStyles.unselectedButton,
+                { marginRight: 8 },
+            ]}
+            onPress={() => setSelectedPlaceType(place.value)}
+        >
+            <Text
+                style={
+                    selectedPlaceType === place.value
+                        ? globalStyles.selectedText
+                        : globalStyles.unselectedText
+                }
+            >
+                {place.label} ({placeCounts[place.value] || 0})
+            </Text>
+        </TouchableOpacity>
+    ), [selectedPlaceType, placeCounts]);
 
-    const handleRandomRender = async () => {
-        const response = await checkNearbyPlacesOSM({
-            distance,
-            setIsLoading
-        });
-        console.log(response, "res");
+    const handleRandomRender = useCallback(async () => {
+        if (!isConnected) {
+            Toast.show({ type: 'error', text1: 'Error', text2: 'Internet not available' });
+            return;
+        }
+        const response = await checkNearbyPlacesOSM({ distance, setIsLoading });
         setDistance(0);
 
-        if (response.places && response.places.length) {
-            console.log('in if', response.places);
+        if (response.places?.length) {
             const limited = response.places.slice(0, 100);
             setLimitedPlaces(limited);
 
@@ -65,21 +107,18 @@ const HomeScreen = ({ navigation }) => {
         } else {
             setPlaceCounts(0);
             setSearchResult('nothing');
+            setFilteredPlaces([]);
+            setLimitedPlaces([]);
         }
-    };
+    }, [distance, isConnected, selectedPlaceType, filterPlaces, setIsLoading]);
 
-    const filterPlaces = (places, type) => {
+    const filterPlaces = useCallback((places, type) => {
         const filtered = places.filter(place => place.type === type);
         setFilteredPlaces(filtered);
-        console.log(filtered, "f");
-        if (filtered.length > 0) {
-            setSearchResult(type);
-        } else {
-            setSearchResult('nothing');
-        }
-    };
+        setSearchResult(filtered.length > 0 ? type : 'nothing');
+    }, []);
 
-    const handleLogout = () => {
+    const handleLogout = useCallback(() => {
         Alert.alert(
             "Logout",
             "Are you sure you want to logout?",
@@ -88,30 +127,28 @@ const HomeScreen = ({ navigation }) => {
                 { text: "Logout", onPress: () => navigation.replace('Login') }
             ]
         );
-    };
+    }, [navigation]);
 
-    const renderResult = () => {
+    const renderResult = useCallback(() => {
         if (searchResult === 'nothing') {
-            return <NothingFoundUI displayName={selectedPlaceType} />;
+            return <MemoizedNothingFoundUI displayName={selectedPlaceType} />;
         } else if (searchResult !== 'nothing') {
-            return <ShopsUI places={filteredPlaces} displayName={selectedPlaceType} />;
-        } else {
-            return
+            return <MemoizedShopsUI places={filteredPlaces} displayName={selectedPlaceType} />;
         }
-
-    }
+        return null;
+    }, [searchResult, selectedPlaceType, filteredPlaces]);
 
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+        <SafeAreaView className="flex-1 bg-gray-200" style={{ paddingTop: insets.top }}>
             <Header rightIconOnPress={handleLogout} />
             <View className='px-4'>
-                <HomeUI />
+                <HomeUI location={location} />
             </View>
 
             <View className="flex-1 px-4">
                 {isLoading ? (
-                    <View className='flex-1 items-center flex-col justify-center'>
+                    <View className='p-6 items-center flex-col justify-center bg-white mt-4 rounded-md'>
                         <LottieView
                             source={require('../assets/animation/searching.json')}
                             autoPlay
@@ -125,11 +162,11 @@ const HomeScreen = ({ navigation }) => {
                             <View style={{ position: 'relative' }}>
                                 <CustomSlider
                                     onValueChange={(value) => {
+                                        console.log(value, 'value')
                                         if (value.value > 100000) {
                                             setError('* Please reduce search radius');
                                         } else {
                                             setDistance(value.value);
-                                            setDisplayName(value.placeType);
                                             setError('');
                                         }
                                     }}
@@ -156,29 +193,7 @@ const HomeScreen = ({ navigation }) => {
                                         style={{ marginTop: 8 }}
                                         contentContainerStyle={{ paddingHorizontal: 4 }}
                                     >
-                                        {placeTypes.map((place) => (
-                                            <TouchableOpacity
-                                                key={place.value}
-                                                style={[
-                                                    globalStyles.placeButton,
-                                                    selectedPlaceType === place.value
-                                                        ? globalStyles.selectedButton
-                                                        : globalStyles.unselectedButton,
-                                                    { marginRight: 8 },
-                                                ]}
-                                                onPress={() => setSelectedPlaceType(place.value)}
-                                            >
-                                                <Text
-                                                    style={
-                                                        selectedPlaceType === place.value
-                                                            ? globalStyles.selectedText
-                                                            : globalStyles.unselectedText
-                                                    }
-                                                >
-                                                    {place.label} ({placeCounts[place.value] || 0})
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
+                                        {placeTypes.map(renderPlaceTypeButton)}
                                     </ScrollView>
                                 </View>
                                 <View style={{ flex: 1 }}>
@@ -189,7 +204,7 @@ const HomeScreen = ({ navigation }) => {
                     </>
                 )}
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 
@@ -320,28 +335,29 @@ const ShopsUI = ({ places, displayName }) => (
             renderItem={({ item }) => <PlaceItem place={item} iconName="shopping-bag" />}
         />
     </View>
-);
+)
 
-const HomeUI = () => (
+const HomeUI = ({ location }) => (
     <View style={[globalStyles.paddingContent, globalStyles.center]}>
         <Text className="text-xl font-semibold text-gray-800 mb-2">Welcome Home!</Text>
         <Text className="text-gray-600 text-center px-10">
-            You're viewing your home location.
+            {location?.placeName || 'Current location'}
         </Text>
     </View>
 );
 
 const NothingFoundUI = ({ displayName }) => (
     <View style={[globalStyles.paddingContent, globalStyles.center]}>
-        <Image
-            source={require('../assets/logo/fydoin_logo.jpeg')}
-            className="w-32 h-32 mb-6"
+        <LottieView
+            source={require('../assets/animation/empty.json')}
+            autoPlay
+            loop
+            style={globalStyles.empty}
         />
-        <Text className="text-xl font-semibold text-gray-800 mb-2">Nothing Found</Text>
+        <Text className="text-3xl mt-8 font-bold text-gray-800 mb-2">We are not operational in your area</Text>
+        <Text ><Text className='font-bold'>{" "}{displayName}{" "}</Text>shop not found near you</Text>
         <Text className="text-gray-600 text-center px-10">
-            Try widening your search radius in order to search
-            <Text style={{ fontWeight: 'bold' }}>{" "}{displayName}{" "}</Text>
-            shop near you
+            Try widening your search radius
         </Text>
     </View>
 );
