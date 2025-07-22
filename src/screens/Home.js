@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@react-navigation/native';
 import { InternetContext } from '../context/InternetContext';
 import Toast from "react-native-toast-message";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -124,7 +125,12 @@ const HomeScreen = ({ navigation }) => {
             "Are you sure you want to logout?",
             [
                 { text: "Cancel", style: "cancel" },
-                { text: "Logout", onPress: () => navigation.replace('Login') }
+                {
+                    text: "Logout", onPress: () => {
+                        AsyncStorage.removeItem('isLoggedIn');
+                        navigation.replace('Login')
+                    }
+                }
             ]
         );
     }, [navigation]);
@@ -174,7 +180,7 @@ const HomeScreen = ({ navigation }) => {
                                 {error && <Text style={globalStyles.error}>{error}</Text>}
                             </View>
                             <TouchableOpacity
-                            className='px-4 my-4'
+                                className='px-4 my-4'
                                 style={globalStyles.submitButton}
                                 onPress={handleRandomRender}
                             >

@@ -38,7 +38,7 @@ function App() {
 
     const timer = setTimeout(() => {
       setIsSplashVisible(false);
-    }, 1000);
+    }, 3600);
     return () => {
       clearTimeout(timer);
     };
